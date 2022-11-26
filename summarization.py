@@ -9,7 +9,6 @@ import pdfplumber
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
 import evaluate
 
-
 def write_html(html: str):
     return st.markdown(html, unsafe_allow_html=True)
 
@@ -71,6 +70,8 @@ def acc_sumarization(texto: str, resumo: str) -> str:
     recebe - texto: texto disponibilizado, resumo: texto resumido pelo modelo
     retorna - acuracia: acuracia do resumo
     """
+    
+    HARIM = evaluate.load('NCSOFT/harim_plus')
 
     texto_cru = [texto]
     texto_resumido = [resumo]
