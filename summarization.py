@@ -67,6 +67,7 @@ def english_sumarization(text):
     return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
 
 
+@st.cache
 def acc_sumarization(texto: str, resumo: str) -> str:
     """'
     Retorna a acurácia do resumo por meio da métrica Harim.
@@ -74,6 +75,8 @@ def acc_sumarization(texto: str, resumo: str) -> str:
     recebe - texto: texto disponibilizado, resumo: texto resumido pelo modelo
     retorna - acuracia: acuracia do resumo
     """
+
+    HARIM = evaluate.load('NCSOFT/harim_plus')
 
     texto_cru = [texto]
     texto_resumido = [resumo]
