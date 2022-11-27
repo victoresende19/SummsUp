@@ -30,7 +30,7 @@ def extract_data(doc):
     return text
 
 
-@st.cache(persist=True, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={"MyUnhashableClass": lambda _: None, suppress_st_warning=True, show_spinner=False, suppress_st_warning=True)
 def portuguese_sumarization(text):
     """'
     Sumariza o texto disponibilizado (em português)
@@ -54,7 +54,7 @@ def portuguese_sumarization(text):
     return write_html(summary)
 
 
-@st.cache(persist=True, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={"MyUnhashableClass": lambda _: None, suppress_st_warning=True, show_spinner=False, suppress_st_warning=True)
 def english_sumarization(text):
     """'
     Sumariza o texto disponibilizado (em inglês)
@@ -67,7 +67,7 @@ def english_sumarization(text):
     return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
 
 
-@st.cache(persist=True, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={"MyUnhashableClass": lambda _: None, suppress_st_warning=True, show_spinner=False, suppress_st_warning=True)
 def acc_sumarization(texto: str, resumo: str) -> str:
     """'
     Retorna a acurácia do resumo por meio da métrica Harim.
