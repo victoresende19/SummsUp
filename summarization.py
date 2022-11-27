@@ -8,6 +8,8 @@ import streamlit as st
 import pdfplumber
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
 import evaluate
+import sentencepiece
+
 
 def write_html(html: str):
     return st.markdown(html, unsafe_allow_html=True)
