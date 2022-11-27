@@ -30,6 +30,7 @@ def extract_data(doc):
     return text
 
 
+@st.cache
 def portuguese_sumarization(text):
     """'
     Sumariza o texto disponibilizado (em português)
@@ -53,6 +54,7 @@ def portuguese_sumarization(text):
     return write_html(summary)
 
 
+@st.cache
 def english_sumarization(text):
     """'
     Sumariza o texto disponibilizado (em inglês)
@@ -72,8 +74,6 @@ def acc_sumarization(texto: str, resumo: str) -> str:
     recebe - texto: texto disponibilizado, resumo: texto resumido pelo modelo
     retorna - acuracia: acuracia do resumo
     """
-    
-    HARIM = evaluate.load('NCSOFT/harim_plus')
 
     texto_cru = [texto]
     texto_resumido = [resumo]
