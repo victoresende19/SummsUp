@@ -110,6 +110,7 @@ if text_type == 'Escrevendo':
 
     if submit_button:
         with st.spinner('Resumindo...'):
+            @st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, suppress_st_warning=True, show_spinner=False)
             display_sumarization(text, language)
 
 elif text_type == 'PDF':
@@ -121,4 +122,5 @@ elif text_type == 'PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
+            @st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, suppress_st_warning=True, show_spinner=False)
             display_sumarization(pdf, language)
