@@ -71,7 +71,8 @@ def english_summarization(text: str) -> str:
     """
 
     summarizer = english_model()
-    return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
+    #return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
+    return summarizer(text)
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
