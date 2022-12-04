@@ -39,7 +39,9 @@ def portuguese_model():
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def english_model():
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    #summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    summarizer = pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
+
 
     return summarizer
     
