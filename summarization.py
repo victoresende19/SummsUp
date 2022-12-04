@@ -18,7 +18,6 @@ def file_upload(file):
         return pdf
 
 
-@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def extract_data(doc):
     pdf = pdfplumber.open(doc)
     text = ''
@@ -28,7 +27,7 @@ def extract_data(doc):
     return text
 
 
-@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600)
 def portuguese_summarization(text: str) -> str:
     """
     Sumariza o texto disponibilizado (em português)
@@ -51,7 +50,7 @@ def portuguese_summarization(text: str) -> str:
     return summary
 
 
-@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600)
 def english_summarization(text: str) -> str:
     """
     Sumariza o texto disponibilizado (em inglês)
@@ -64,7 +63,7 @@ def english_summarization(text: str) -> str:
     return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
 
 
-@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600)
 def acc_summarization(texto: str, resumo: str) -> str:
     """
     Retorna a acurácia do resumo por meio da métrica Harim.
