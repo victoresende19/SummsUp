@@ -4,12 +4,12 @@ Created on Thu Nov 10 09:18:08 2022
 
 @author: Victor Resende
 """
+
 import streamlit as st
 import pdfplumber
-from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
 import evaluate
 from io import StringIO
-import re
 
 
 def file_upload(file):
@@ -37,34 +37,21 @@ def portuguese_summarization(text: str) -> str:
     retorna - texto: texto sumarizado (em português)
     """
 
-    def WHITESPACE_HANDLER(k): return re.sub(
-        '\s+', ' ', re.sub('\n+', ' ', k.strip()))
-    article_text = text
+    """'
+    Sumariza o texto disponibilizado (em português)
+    recebe - texto: texto disponibilizado 
+    retorna - texto: texto sumarizado (em português)
+    """
 
-    model_name = "csebuetnlp/mT5_multilingual_XLSum"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    token_name = 'unicamp-dl/ptt5-base-portuguese-vocab'
+    model_name = 'phpaiola/ptt5-base-summ-xlsum'
 
-    input_ids = tokenizer(
-        [WHITESPACE_HANDLER(article_text)],
-        return_tensors="pt",
-        padding="max_length",
-        truncation=True,
-        max_length=512
-    )["input_ids"]
+    tokenizer = T5Tokenizer.from_pretrained(token_name)
+    model_pt = T5ForConditionalGeneration.from_pretrained(model_name)
 
-    output_ids = model.generate(
-        input_ids=input_ids,
-        max_length=256,
-        no_repeat_ngram_size=2,
-        num_beams=4
-    )[0]
-
-    summary = tokenizer.decode(
-        output_ids,
-        skip_special_tokens=True,
-        clean_up_tokenization_spaces=False
-    )
+    inputs = tokenizer.encode(text, max_length=512, truncation=True, return_tensors='pt')
+    summary_ids = model_pt.generate(inputs, max_length=256, min_length=32, num_beams=5, no_repeat_ngram_size=3, early_stopping=True)
+    summary = tokenizer.decode(summary_ids[0])
 
     return summary
 
@@ -128,7 +115,7 @@ expander.markdown(
 )
 
 
-text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
+text_type = st.selectbox('Que maneira gostaria de resumir seu texto?',('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
 
 if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
