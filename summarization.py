@@ -36,12 +36,7 @@ def portuguese_summarization(text: str) -> str:
     recebe - texto: texto disponibilizado 
     retorna - texto: texto sumarizado (em português)
     """
-
-    """'
-    Sumariza o texto disponibilizado (em português)
-    recebe - texto: texto disponibilizado 
-    retorna - texto: texto sumarizado (em português)
-    """
+   
 
     token_name = 'unicamp-dl/ptt5-base-portuguese-vocab'
     model_name = 'phpaiola/ptt5-base-summ-xlsum'
