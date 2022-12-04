@@ -122,9 +122,10 @@ if text_type == 'Resumo escrito':
 
     if submit_button:
         with st.spinner('Resumindo...'):
+            summary = display_summarization(text, language)
             st.markdown(f"<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
             st.info(f"{display_summarization(text, language).replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(text, display_summarization(text, language))}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(text, summary)}</p>", unsafe_allow_html=True)
 
 elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
@@ -135,6 +136,7 @@ elif text_type == 'Resumo em PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
+            summary = display_summarization(pdf, language)
             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
-            st.info(f"{display_summarization(pdf, language).replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, display_summarization(pdf, language))}</p>", unsafe_allow_html=True)
+            st.info(f"{summary.replace('<pad> ', '').replace('</s>', '')}")
+            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, summary)}</p>", unsafe_allow_html=True)
