@@ -8,7 +8,7 @@ import streamlit as st
 import pdfplumber
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
 import evaluate
-import sentencepiece
+from io import StringIO
 
 
 def write_html(html: str):
@@ -30,7 +30,7 @@ def extract_data(doc):
     return text
 
 
-@st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def portuguese_sumarization(text):
     """'
     Sumariza o texto disponibilizado (em português)
@@ -54,7 +54,7 @@ def portuguese_sumarization(text):
     return write_html(summary)
 
 
-@st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def english_sumarization(text):
     """'
     Sumariza o texto disponibilizado (em inglês)
@@ -67,7 +67,7 @@ def english_sumarization(text):
     return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
 
 
-@st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, suppress_st_warning=True, show_spinner=False)
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def acc_sumarization(texto: str, resumo: str) -> str:
     """'
     Retorna a acurácia do resumo por meio da métrica Harim.
@@ -87,40 +87,57 @@ def acc_sumarization(texto: str, resumo: str) -> str:
 
 def display_sumarization(text, language):
     if language == 'Português':
-        return write_html(f"<h2 style='text-align: center; color: black;'> Texto sumarizado: </h2> <br><br> {portuguese_sumarization(text)}")
+        return portuguese_sumarization(text)
     elif language == 'Inglês':
-        return write_html(f"<h2 style='text-align: center; color: black;'> Texto sumarizado: </h2> <br><br> {english_sumarization(text)}")
+        return english_sumarization(text)
 
 
-st.set_page_config(page_icon='📋', page_title='Sumarizador de textos')
+st.set_page_config(
+    page_icon='🎈', page_title='Sumarizador de textos')
+
 write_html(
-    "<h1 style='text-align: center; color: black;'> Sumarizador de textos </h1>")
-write_html(
-    "<p align='justify'> Por Victor Augusto Souza Resende  <p align='justify'>")
+    "<h1 style='text-align: center; color: black;'> 📋 Sumarizador de textos 📋 </h1>")
+expander = st.expander(label="🛈 Sobre o aplicativo", expanded=True)
+expander.markdown(
+    """
+        - O *Sumarizador de Textos* é uma interface fácil de usar construída em Stramlit para criar para o resumo de textos digitados pelo usuário ou PDF.
+        - O aplicativo utiliza redes neurais pré-treinadas que aproveitam várias incorporações de NLP e depende de [Transformers](https://huggingface.co/transformers/).
+        - Além disso, a aplicação conta com suporte para resumir dois tipos de idiomas: Português e Inglês! 🤗 
+        - Para mais informações ou sugestões, contate o autor: [Victor Resende](https://www.linkedin.com/in/victor-resende-508b75196/). 
+    """
+)
+st.markdown("")
+st.markdown("")
+
 
 text_type = st.selectbox('Que maneira gostaria de resumir seu texto?',
-                         ('Escolha as opções', 'Escrevendo', 'PDF'))
+                         ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
 
-if text_type == 'Escrevendo':
+if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
     language = form.selectbox('Qual a língua do PDF?', ('Português', 'Inglês'))
-    text = form.text_input('Texto a ser resumido:',
-                           placeholder='Escreva aqui...')
-    submit_button = form.form_submit_button(label='Aplicar')
+    text = form.text_area(
+        "Texto a ser resumido:",
+        height=510,
+        placeholder='Escreva aqui...'
+    )
+    submit_button = form.form_submit_button(label='✨ Resumir!')
 
     if submit_button:
         with st.spinner('Resumindo...'):
-            @st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, suppress_st_warning=True, show_spinner=False)
-            display_sumarization(text, language)
+            st.markdown(f'{display_sumarization(text, language)}',
+                        unsafe_allow_html=True)
+            #acc_sumarization(text, display_sumarization(text, language))
 
-elif text_type == 'PDF':
+elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
     language = form.selectbox('Qual a língua do PDF?', ('Português', 'Inglês'))
     file = form.file_uploader('Escolha o arquivo PDF:', type="pdf")
-    submit_button = form.form_submit_button(label='Aplicar')
+    submit_button = form.form_submit_button(label='✨ Resumir!')
 
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
-            @st.cache(hash_funcs={"MyUnhashableClass": lambda _: None}, suppress_st_warning=True, show_spinner=False)
-            display_sumarization(pdf, language)
+            st.markdown(f'{display_sumarization(pdf, language)}',
+                        unsafe_allow_html=True)
+            #acc_sumarization(pdf, display_sumarization(pdf, language))
