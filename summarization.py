@@ -35,6 +35,13 @@ def portuguese_model():
     model_pt = T5ForConditionalGeneration.from_pretrained(model_name)
 
     return tokenizer, model_pt
+
+
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
+def english_model():
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+
+    return summarizer
     
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
@@ -61,7 +68,7 @@ def english_summarization(text: str) -> str:
     retorna - texto: texto sumarizado (em inglês)
     """
 
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    summarizer = english_model()
     return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
 
 
