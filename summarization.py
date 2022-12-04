@@ -4,12 +4,12 @@ Created on Thu Nov 10 09:18:08 2022
 
 @author: Victor Resende
 """
-
 import streamlit as st
 import pdfplumber
-from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
+from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 import evaluate
 from io import StringIO
+import re
 
 
 def file_upload(file):
@@ -18,6 +18,7 @@ def file_upload(file):
         return pdf
 
 
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def extract_data(doc):
     pdf = pdfplumber.open(doc)
     text = ''
@@ -28,32 +29,49 @@ def extract_data(doc):
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def portuguese_summarization(text):
-    """'
+def portuguese_summarization(text: str) -> str:
+    """
     Sumariza o texto disponibilizado (em português)
 
     recebe - texto: texto disponibilizado 
     retorna - texto: texto sumarizado (em português)
     """
 
-    token_name = 'unicamp-dl/ptt5-base-portuguese-vocab'
-    model_name = 'phpaiola/ptt5-base-summ-xlsum'
+    def WHITESPACE_HANDLER(k): return re.sub(
+        '\s+', ' ', re.sub('\n+', ' ', k.strip()))
+    article_text = text
 
-    tokenizer = T5Tokenizer.from_pretrained(token_name)
-    model_pt = T5ForConditionalGeneration.from_pretrained(model_name)
+    model_name = "csebuetnlp/mT5_multilingual_XLSum"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
-    inputs = tokenizer.encode(text, max_length=512,
-                              truncation=True, return_tensors='pt')
-    summary_ids = model_pt.generate(
-        inputs, max_length=256, min_length=32, num_beams=5, no_repeat_ngram_size=3, early_stopping=True)
-    summary = tokenizer.decode(summary_ids[0])
+    input_ids = tokenizer(
+        [WHITESPACE_HANDLER(article_text)],
+        return_tensors="pt",
+        padding="max_length",
+        truncation=True,
+        max_length=512
+    )["input_ids"]
+
+    output_ids = model.generate(
+        input_ids=input_ids,
+        max_length=256,
+        no_repeat_ngram_size=2,
+        num_beams=4
+    )[0]
+
+    summary = tokenizer.decode(
+        output_ids,
+        skip_special_tokens=True,
+        clean_up_tokenization_spaces=False
+    )
 
     return summary
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
-def english_summarization(text):
-    """'
+def english_summarization(text: str) -> str:
+    """
     Sumariza o texto disponibilizado (em inglês)
 
     recebe - texto: texto disponibilizado 
@@ -66,7 +84,7 @@ def english_summarization(text):
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False)
 def acc_summarization(texto: str, resumo: str) -> str:
-    """'
+    """
     Retorna a acurácia do resumo por meio da métrica Harim.
 
     recebe - texto: texto disponibilizado, resumo: texto resumido pelo modelo
@@ -89,12 +107,17 @@ def display_summarization(text, language):
         return english_summarization(text)
 
 
-st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos')
+st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
+st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>",unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center; color: black;'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
-
-#expander = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
-expander = st.expander(label="🛈 Sobre o aplicativo", expanded=True)
+st.sidebar.markdown('')
+st.sidebar.markdown('')
+st.sidebar.markdown('')
+st.sidebar.markdown('')
+st.sidebar.markdown('')
+st.sidebar.markdown('')
+expander = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
+#expander = st.expander(label="🛈 Sobre o aplicativo", expanded=True)
 expander.markdown(
     """
         - O *Sumarizador de Textos* é uma interface fácil de usar construída em Stramlit para criar resumos de textos digitados pelo usuário ou arquivos PDF.
@@ -103,12 +126,9 @@ expander.markdown(
         - Para mais informações ou sugestões, contate o autor: [Victor Resende](https://www.linkedin.com/in/victor-resende-508b75196/). 
     """
 )
-st.markdown("")
-st.markdown("")
 
 
-text_type = st.selectbox('Que maneira gostaria de resumir seu texto?',
-                         ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
+text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
 
 if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
@@ -122,10 +142,9 @@ if text_type == 'Resumo escrito':
 
     if submit_button:
         with st.spinner('Resumindo...'):
-            summary = display_summarization(text, language)
-            st.markdown(f"<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
-            st.info(f"{summary.replace('<pad> ', '').replace('</s>', '')}")
-            #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(text, summary)}</p>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
+            st.info(f"{display_summarization(text, language).replace('<pad> ', '').replace('</s>', '')}")
+            #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(text, display_summarization(text, language))}</p>", unsafe_allow_html=True)
 
 elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
@@ -136,7 +155,6 @@ elif text_type == 'Resumo em PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
-            summary = display_summarization(pdf, language)
             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
-            st.info(f"{summary.replace('<pad> ', '').replace('</s>', '')}")
-            #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, summary)}</p>", unsafe_allow_html=True)
+            st.info(f"{display_summarization(pdf, language).replace('<pad> ', '').replace('</s>', '')}")
+            #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, display_summarization(pdf, language))}</p>", unsafe_allow_html=True)
