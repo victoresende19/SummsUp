@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Nov 10 09:18:08 2022
-
 @author: Victor Resende
 """
 
@@ -28,21 +27,25 @@ def extract_data(doc):
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
-def portuguese_summarization(text: str) -> str:
-    """
-    Sumariza o texto disponibilizado (em português)
-
-    recebe - texto: texto disponibilizado 
-    retorna - texto: texto sumarizado (em português)
-    """
-   
-
+def portuguese_model():
     token_name = 'unicamp-dl/ptt5-base-portuguese-vocab'
     model_name = 'phpaiola/ptt5-base-summ-xlsum'
 
     tokenizer = T5Tokenizer.from_pretrained(token_name)
     model_pt = T5ForConditionalGeneration.from_pretrained(model_name)
 
+    return tokenizer, model_pt
+    
+
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
+def portuguese_summarization(text: str) -> str:
+    """
+    Sumariza o texto disponibilizado (em português)
+    recebe - texto: texto disponibilizado 
+    retorna - texto: texto sumarizado (em português)
+    """
+
+    tokenizer, model_pt = portuguese_model()
     inputs = tokenizer.encode(text, max_length=512, truncation=True, return_tensors='pt')
     summary_ids = model_pt.generate(inputs, max_length=256, min_length=32, num_beams=5, no_repeat_ngram_size=3, early_stopping=True)
     summary = tokenizer.decode(summary_ids[0])
@@ -54,7 +57,6 @@ def portuguese_summarization(text: str) -> str:
 def english_summarization(text: str) -> str:
     """
     Sumariza o texto disponibilizado (em inglês)
-
     recebe - texto: texto disponibilizado 
     retorna - texto: texto sumarizado (em inglês)
     """
@@ -67,7 +69,6 @@ def english_summarization(text: str) -> str:
 def acc_summarization(texto: str, resumo: str) -> str:
     """
     Retorna a acurácia do resumo por meio da métrica Harim.
-
     recebe - texto: texto disponibilizado, resumo: texto resumido pelo modelo
     retorna - acuracia: acuracia do resumo
     """
@@ -89,7 +90,7 @@ def display_summarization(text, language):
 
 
 st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
-st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>",unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
 
 st.sidebar.markdown('')
 st.sidebar.markdown('')
@@ -109,7 +110,7 @@ expander.markdown(
 )
 
 
-text_type = st.selectbox('Que maneira gostaria de resumir seu texto?',('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
+text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
 
 if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
@@ -139,3 +140,4 @@ elif text_type == 'Resumo em PDF':
             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
             st.info(f"{display_summarization(pdf, language).replace('<pad> ', '').replace('</s>', '')}")
             #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, display_summarization(pdf, language))}</p>", unsafe_allow_html=True)
+
