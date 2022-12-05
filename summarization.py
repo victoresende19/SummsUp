@@ -104,8 +104,7 @@ def display_summarization(text, language):
         return english_summarization(text)
 
 
-st.set_page_config(
-    page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
+st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
 st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>", unsafe_allow_html=True)
 
