@@ -7,19 +7,19 @@ Created on Thu Nov 10 09:18:08 2022
 import streamlit as st
 import pdfplumber
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, BertTokenizerFast, EncoderDecoderModel
-import torch
+#import torch
 import evaluate
 from io import StringIO
 from PIL import Image
 
 
-def file_upload(file):
-    if file is not None:
-        pdf = extract_data(file)
-        return pdf
-
-
 def extract_data(doc):
+    """
+    Extraí o texto do arquivo PDF
+    recebe - doc: documento pdf PDF 
+    retorna - text: texto extraído
+    """
+    
     pdf = pdfplumber.open(doc)
     text = ''
     for page in pdf.pages:
@@ -28,8 +28,26 @@ def extract_data(doc):
     return text
 
 
+def file_upload(file):
+    """
+    Verifica a existencia do arquivo PDF
+    recebe - file: arquivo pdf
+    retorna - text: arquivo pdf
+    """
+   
+    if file is not None:
+        pdf = extract_data(file)
+        return pdf
+
+
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def portuguese_model():
+    """
+    Carrega o modelo sumarizador em portugues 
+    (https://huggingface.co/phpaiola/ptt5-base-summ-xlsum)
+    retorna - tokenizer: tokenizador, model_pt: modelo pre-treinado em portugues    
+    """
+    
     token_name = 'unicamp-dl/ptt5-base-portuguese-vocab'
     model_name = 'phpaiola/ptt5-base-summ-xlsum'
 
@@ -41,15 +59,27 @@ def portuguese_model():
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def english_model():
+    """
+    Carrega o modelo sumarizador em ingles 
+    (https://huggingface.co/mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization)
+    retorna - device: dispositivo, tokenizer: tokenizador, model_en: modelo pre-treinado em ingles    
+    """
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     tokenizer = BertTokenizerFast.from_pretrained('mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization')
     model = EncoderDecoderModel.from_pretrained('mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization').to(device)
 
-    return device, tokenizer, model
+    return device, tokenizer, model_en
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def ROUGE_metric():
+    """
+    Carrega o modelo para a metrica ROUGE
+    (https://huggingface.co/spaces/evaluate-metric/rouge)
+    retorna - ROUGE: modelo ROUGE  
+    """
+    
     ROUGE = evaluate.load('rouge')
 
     return ROUGE
@@ -160,7 +190,7 @@ if text_type == 'Resumo escrito':
             final_summary = display_summarization(text, language)
             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
             st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
 
 elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
@@ -174,4 +204,4 @@ elif text_type == 'Resumo em PDF':
             final_summary = display_summarization(pdf, language)
             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
             st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE</a>): {acc_summarization(pdf, final_summary)}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(pdf, final_summary)}</p>", unsafe_allow_html=True)
