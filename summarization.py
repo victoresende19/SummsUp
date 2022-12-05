@@ -6,7 +6,8 @@ Created on Thu Nov 10 09:18:08 2022
 
 import streamlit as st
 import pdfplumber
-from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
+from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, BertTokenizerFast, EncoderDecoderModel
+import torch
 import evaluate
 from io import StringIO
 from PIL import Image
@@ -40,9 +41,11 @@ def portuguese_model():
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def english_model():
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    tokenizer = BertTokenizerFast.from_pretrained('mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization')
+    model = EncoderDecoderModel.from_pretrained('mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization').to(device)
 
-    return summarizer
+    return device, tokenizer, model
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
@@ -75,9 +78,15 @@ def english_summarization(text: str) -> str:
     recebe - texto: texto disponibilizado 
     retorna - texto: texto sumarizado (em inglês)
     """
+    
+    device, tokenizer, model = english_model()
 
-    summarizer = english_model()
-    return summarizer(text)
+    inputs = tokenizer([text], padding="max_length", truncation=True, max_length=512, return_tensors="pt")
+    input_ids = inputs.input_ids.to(device)
+    attention_mask = inputs.attention_mask.to(device)
+    output = model.generate(input_ids, attention_mask=attention_mask)
+
+    return tokenizer.decode(output[0], skip_special_tokens=True)
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
