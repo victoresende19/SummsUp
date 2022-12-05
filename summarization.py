@@ -5,12 +5,12 @@ Created on Thu Nov 10 09:18:08 2022
 """
 
 import streamlit as st
-import pdfplumber
-from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, BertTokenizerFast, EncoderDecoderModel
-#import torch
-import evaluate
-from io import StringIO
 from PIL import Image
+import pdfplumber
+from io import StringIO
+from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, BertTokenizerFast, EncoderDecoderModel
+import torch
+import evaluate
 
 
 def extract_data(doc):
@@ -136,11 +136,36 @@ def acc_summarization(texto: str, resumo: str) -> str:
     return round(acuracia['rouge1'], 2)
 
 
-def display_summarization(text, language):
+def summarization(text: str, language: str) -> str:
+    """
+    Faz a sumarizacao de acordo com a lingua escolhida
+    recebe - text: texto disponibilizado, language: linguagem escolhida
+    retorna - modelo aplicado sobre o texto
+    """
+    
     if language == 'Português':
         return portuguese_summarization(text)
     elif language == 'Inglês':
         return english_summarization(text)
+    
+    
+def display_summarization(text: str, language: str) -> str:
+    """
+    Faz a sumarizacao de acordo com a lingua escolhida
+    recebe - text: texto disponibilizado, language: linguagem escolhida
+    retorna - modelo aplicado sobre o texto
+    """
+    
+    if language == 'Português':
+        final_summary = portuguese_summarization(text)
+        st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
+        st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
+        st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
+    elif language == 'Inglês':
+        final_summary = english_summarization(text)
+        st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
+        st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
+        st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
 
 
 st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
@@ -187,10 +212,11 @@ if text_type == 'Resumo escrito':
 
     if submit_button:
         with st.spinner('Resumindo...'):
-            final_summary = display_summarization(text, language)
-            st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
-            st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
+            display_summarization(text: str, language: str)
+#             final_summary = summarization(text, language)
+#             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
+#             st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
+#             st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
 
 elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
@@ -201,7 +227,7 @@ elif text_type == 'Resumo em PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
-            final_summary = display_summarization(pdf, language)
+            final_summary = summarization(pdf, language)
             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
             st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
             st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(pdf, final_summary)}</p>", unsafe_allow_html=True)
