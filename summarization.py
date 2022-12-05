@@ -48,6 +48,13 @@ def english_model():
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
+def ROUGE_metric():
+    ROUGE = evaluate.load('rouge')
+
+    return ROUGE
+
+
+@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def portuguese_summarization(text: str) -> str:
     """
     Sumariza o texto disponibilizado (em português)
@@ -74,25 +81,24 @@ def english_summarization(text: str) -> str:
     """
 
     summarizer = english_model()
-    # return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
     return summarizer(text)
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def acc_summarization(texto: str, resumo: str) -> str:
     """
-    Retorna a acurácia do resumo por meio da métrica Harim.
+    Retorna a acurácia do resumo por meio da métrica ROUGE.
     recebe - texto: texto disponibilizado, resumo: texto resumido pelo modelo
     retorna - acuracia: acuracia do resumo
     """
 
-    HARIM = evaluate.load('NCSOFT/harim_plus')
+    ROUGE = ROUGE_metric()
 
     texto_cru = [texto]
     texto_resumido = [resumo]
-    acuracia = HARIM.compute(references=texto_cru, predictions=texto_resumido)
+    acuracia = ROUGE.compute(references=texto_cru, predictions=texto_resumido)
 
-    return round(acuracia[0], 4)
+    return acuracia
 
 
 def display_summarization(text, language):
@@ -123,7 +129,8 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
-expanderAbout = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
+expanderAbout = st.sidebar.expander(
+    label="🛈 Sobre o aplicativo", expanded=True)
 expanderAbout.markdown(
     """
         - O *Sumarizador de Textos* é uma interface fácil de usar construída em Stramlit para criar resumos de textos digitados pelo usuário ou arquivos PDF.
@@ -156,11 +163,13 @@ if text_type == 'Resumo escrito':
 
     if submit_button:
         with st.spinner('Resumindo...'):
+            final_summary = display_summarization(text, language)
             st.markdown(
                 "<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
             st.info(
-                f"{display_summarization(text, language).replace('<pad> ', '').replace('</s>', '')}")
-            #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(text, display_summarization(text, language))}</p>", unsafe_allow_html=True)
+                f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
+            st.markdown(
+                f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
 
 elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
@@ -171,8 +180,10 @@ elif text_type == 'Resumo em PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
+            final_summary = display_summarization(pdf, language)
             st.markdown(
                 "<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
             st.info(
-                f"{display_summarization(pdf, language).replace('<pad> ', '').replace('</s>', '')}")
-            #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, display_summarization(pdf, language))}</p>", unsafe_allow_html=True)
+                f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
+            st.markdown(
+                f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE</a>): {acc_summarization(pdf, final_summary)}</p>", unsafe_allow_html=True)
