@@ -103,8 +103,22 @@ def display_summarization(text, language):
 
 
 st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
-st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>",unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>",unsafe_allow_html=True)
+
+st.markdown(
+    """
+    <style>
+        [data-testid=stSidebar] [data-testid=stImage]{
+            text-align: center;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+    </style>
+    """, unsafe_allow_html=True
+)
 
 expanderAbout = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
 expanderAbout.markdown(
@@ -119,11 +133,10 @@ st.sidebar.markdown('')
 st.sidebar.markdown('')
 
 st.sidebar.markdown("<h4 style='text-align: center; color: black;'> Contate o autor por meio do QRCode </h4>", unsafe_allow_html=True)
-st.sidebar.image(Image.open('Images\QRCode.png'), caption='LinkedIn Victor Resende')
+st.sidebar.image(Image.open('Images\QRCode.png'), caption='LinkedIn Victor Resende', width=230)
 
 
-text_type = st.selectbox('Que maneira gostaria de resumir seu texto?',
-                         ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
+text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
 
 if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
