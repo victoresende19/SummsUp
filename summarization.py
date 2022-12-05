@@ -133,7 +133,7 @@ st.sidebar.markdown('')
 st.sidebar.markdown('')
 
 st.sidebar.markdown("<h4 style='text-align: center; color: black;'> Contate o autor por meio do QRCode </h4>", unsafe_allow_html=True)
-st.sidebar.image(Image.open('Images\QRCode.png'), caption='LinkedIn Victor Resende', width=230)
+st.sidebar.image(Image.open('Images/QRCode.png'), caption='LinkedIn Victor Resende', width=230)
 
 
 text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
