@@ -40,14 +40,16 @@ def portuguese_model():
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def english_model():
-    #summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-    summarizer = pipeline(
-        "summarization", model="philschmid/bart-large-cnn-samsum")
-
+    summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
     return summarizer
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
+def HARIM_accuracy():
+    summarizer = pipeline("summarization", model="knkarthick/MEETING_SUMMARY")
+    return summarizer
+
+#@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def portuguese_summarization(text: str) -> str:
     """
     Sumariza o texto disponibilizado (em português)
@@ -65,7 +67,7 @@ def portuguese_summarization(text: str) -> str:
     return summary
 
 
-@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
+#@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def english_summarization(text: str) -> str:
     """
     Sumariza o texto disponibilizado (em inglês)
@@ -78,7 +80,7 @@ def english_summarization(text: str) -> str:
     return summarizer(text)
 
 
-@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
+#@st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def acc_summarization(texto: str, resumo: str) -> str:
     """
     Retorna a acurácia do resumo por meio da métrica Harim.
@@ -86,7 +88,7 @@ def acc_summarization(texto: str, resumo: str) -> str:
     retorna - acuracia: acuracia do resumo
     """
 
-    HARIM = evaluate.load('NCSOFT/harim_plus')
+    HARIM = HARIM_accuracy()
 
     texto_cru = [texto]
     texto_resumido = [resumo]
