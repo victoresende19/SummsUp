@@ -45,9 +45,9 @@ def english_model():
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
-def ROUGE_accuracy():
-    summarizer = evaluate.load('rouge')
-    return summarizer
+def ROUGE_metric():
+    ROUGE = evaluate.load('rouge')
+    return ROUGE
 
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
@@ -59,8 +59,10 @@ def portuguese_summarization(text: str) -> str:
     """
 
     tokenizer, model_pt = portuguese_model()
-    inputs = tokenizer.encode(text, max_length=512, truncation=True, return_tensors='pt')
-    summary_ids = model_pt.generate(inputs, max_length=256, min_length=32, num_beams=5, no_repeat_ngram_size=3, early_stopping=True)
+    inputs = tokenizer.encode(text, max_length=512,
+                              truncation=True, return_tensors='pt')
+    summary_ids = model_pt.generate(
+        inputs, max_length=256, min_length=32, num_beams=5, no_repeat_ngram_size=3, early_stopping=True)
     summary = tokenizer.decode(summary_ids[0])
 
     return summary
@@ -86,13 +88,13 @@ def acc_summarization(texto: str, resumo: str) -> str:
     retorna - acuracia: acuracia do resumo
     """
 
-    ROUGE = ROUGE_accuracy()
+    ROUGE = ROUGE_metric()
 
     texto_cru = [texto]
     texto_resumido = [resumo]
     acuracia = ROUGE.compute(predictions=texto_resumido, references=texto_cru)
 
-    return round(acuracia[0], 4)
+    return acuracia
 
 
 def display_summarization(text, language):
@@ -102,9 +104,12 @@ def display_summarization(text, language):
         return english_summarization(text)
 
 
-st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
-st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>", unsafe_allow_html=True)
+st.set_page_config(
+    page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
+st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>",
+            unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>",
+            unsafe_allow_html=True)
 
 st.markdown(
     """
@@ -120,7 +125,8 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
-expanderAbout = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
+expanderAbout = st.sidebar.expander(
+    label="🛈 Sobre o aplicativo", expanded=True)
 expanderAbout.markdown(
     """
         - O *Sumarizador de Textos* é uma interface fácil de usar construída em Stramlit para criar resumos de textos digitados pelo usuário ou arquivos PDF.
@@ -132,22 +138,29 @@ expanderAbout.markdown(
 st.sidebar.markdown('')
 st.sidebar.markdown('')
 
-st.sidebar.markdown("<h4 style='text-align: center; color: black;'> Contate o autor por meio do QRCode </h4>", unsafe_allow_html=True)
-st.sidebar.image(Image.open('Images/QRCode.png'), caption='LinkedIn Victor Resende', width=230)
+st.sidebar.markdown(
+    "<h4 style='text-align: center; color: black;'> Contate o autor por meio do QRCode </h4>", unsafe_allow_html=True)
+st.sidebar.image(Image.open('Images/QRCode.png'),
+                 caption='LinkedIn Victor Resende', width=230)
 
-text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
+text_type = st.selectbox('Que maneira gostaria de resumir seu texto?',
+                         ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
 
 if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
     language = form.selectbox('Qual a língua do PDF?', ('Português', 'Inglês'))
-    text = form.text_area("Texto a ser resumido:", height=300, placeholder='Escreva aqui...')
+    text = form.text_area("Texto a ser resumido:",
+                          height=300, placeholder='Escreva aqui...')
     submit_button = form.form_submit_button(label='✨ Resumir!')
 
     if submit_button:
         with st.spinner('Resumindo...'):
-            st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
-            st.info(f"{display_summarization(text, language).replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(text, display_summarization(text, language))}</p>", unsafe_allow_html=True)
+            summary = display_summarization(text, language)
+            st.markdown(
+                "<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
+            st.info(f"{summary.replace('<pad> ', '').replace('</s>', '')}")
+            st.markdown(
+                f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(text, summary)}</p>", unsafe_allow_html=True)
 
 elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
@@ -158,6 +171,9 @@ elif text_type == 'Resumo em PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
-            st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
-            st.info(f"{display_summarization(pdf, language).replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, display_summarization(pdf, language))}</p>", unsafe_allow_html=True)
+            summary = display_summarization(text, language)
+            st.markdown(
+                "<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
+            st.info(f"{summary.replace('</s>', '')}")
+            st.markdown(
+                f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, summary)}</p>", unsafe_allow_html=True)
