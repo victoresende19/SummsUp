@@ -9,6 +9,7 @@ import pdfplumber
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline
 import evaluate
 from io import StringIO
+from PIL import Image
 
 
 def file_upload(file):
@@ -40,11 +41,11 @@ def portuguese_model():
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def english_model():
     #summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-    summarizer = pipeline("summarization", model="philschmid/bart-large-cnn-samsum")
-
+    summarizer = pipeline(
+        "summarization", model="philschmid/bart-large-cnn-samsum")
 
     return summarizer
-    
+
 
 @st.cache(hash_funcs={StringIO: StringIO.getvalue}, allow_output_mutation=True, suppress_st_warning=True, show_spinner=False, ttl=24*3600, max_entries=2)
 def portuguese_summarization(text: str) -> str:
@@ -55,8 +56,10 @@ def portuguese_summarization(text: str) -> str:
     """
 
     tokenizer, model_pt = portuguese_model()
-    inputs = tokenizer.encode(text, max_length=512, truncation=True, return_tensors='pt')
-    summary_ids = model_pt.generate(inputs, max_length=256, min_length=32, num_beams=5, no_repeat_ngram_size=3, early_stopping=True)
+    inputs = tokenizer.encode(text, max_length=512,
+                              truncation=True, return_tensors='pt')
+    summary_ids = model_pt.generate(
+        inputs, max_length=256, min_length=32, num_beams=5, no_repeat_ngram_size=3, early_stopping=True)
     summary = tokenizer.decode(summary_ids[0])
 
     return summary
@@ -71,7 +74,7 @@ def english_summarization(text: str) -> str:
     """
 
     summarizer = english_model()
-    #return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
+    # return summarizer(text, max_length=130, min_length=30, do_sample=False)[0]['summary_text']
     return summarizer(text)
 
 
@@ -100,27 +103,27 @@ def display_summarization(text, language):
 
 
 st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
-st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>",unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>",unsafe_allow_html=True)
 
-st.sidebar.markdown('')
-st.sidebar.markdown('')
-st.sidebar.markdown('')
-st.sidebar.markdown('')
-st.sidebar.markdown('')
-st.sidebar.markdown('')
-expander = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
-#expander = st.expander(label="🛈 Sobre o aplicativo", expanded=True)
-expander.markdown(
+expanderAbout = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
+expanderAbout.markdown(
     """
         - O *Sumarizador de Textos* é uma interface fácil de usar construída em Stramlit para criar resumos de textos digitados pelo usuário ou arquivos PDF.
         - O aplicativo utiliza redes neurais pré-treinadas que aproveitam várias incorporações de NLP e depende de [Transformers](https://huggingface.co/transformers/).
-        - Além disso, a aplicação conta com suporte para resumir dois tipos de idiomas: Português e Inglês! 🤗 
-        - Para mais informações ou sugestões, contate o autor: [Victor Resende](https://www.linkedin.com/in/victor-resende-508b75196/). 
+        - Além disso, a aplicação conta com suporte para resumir dois tipos de idiomas: Português e Inglês! 🤗
     """
 )
 
+st.sidebar.markdown('')
+st.sidebar.markdown('')
 
-text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
+st.sidebar.markdown("<h4 style='text-align: center; color: black;'> Contate o autor por meio do QRCode </h4>", unsafe_allow_html=True)
+st.sidebar.image(Image.open('Images\QRCode.png'), caption='LinkedIn Victor Resende')
+
+
+text_type = st.selectbox('Que maneira gostaria de resumir seu texto?',
+                         ('Escolha as opções', 'Resumo escrito', 'Resumo em PDF'))
 
 if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
@@ -150,4 +153,3 @@ elif text_type == 'Resumo em PDF':
             st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
             st.info(f"{display_summarization(pdf, language).replace('<pad> ', '').replace('</s>', '')}")
             #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, display_summarization(pdf, language))}</p>", unsafe_allow_html=True)
-
