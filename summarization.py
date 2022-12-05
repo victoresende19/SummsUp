@@ -103,8 +103,8 @@ def display_summarization(text, language):
 
 
 st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
-st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>",unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>", unsafe_allow_html=True)
 
 st.markdown(
     """
@@ -132,7 +132,7 @@ expanderAbout.markdown(
 st.sidebar.markdown('')
 st.sidebar.markdown('')
 
-st.sidebar.markdown("<h4 style='text-align: center; color: black;'> Contate o autor por meio do QRCode </h4>", unsafe_allow_html=True)
+st.sidebar.markdown("<h4 style='text-align: center; color: white;'> Contate o autor por meio do QRCode </h4>", unsafe_allow_html=True)
 st.sidebar.image(Image.open('Images\QRCode.png'), caption='LinkedIn Victor Resende', width=230)
 
 
@@ -163,6 +163,6 @@ elif text_type == 'Resumo em PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
-            st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; color: white;'> Resumo </h4>", unsafe_allow_html=True)
             st.info(f"{display_summarization(pdf, language).replace('<pad> ', '').replace('</s>', '')}")
             #st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/NCSOFT/harim_plus'>HaRiM</a>): {acc_summarization(pdf, display_summarization(pdf, language))}</p>", unsafe_allow_html=True)
