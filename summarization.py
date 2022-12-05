@@ -94,7 +94,7 @@ def acc_summarization(texto: str, resumo: str) -> str:
     texto_resumido = [resumo]
     acuracia = ROUGE.compute(references=texto_cru, predictions=texto_resumido)
 
-    return round(acuracia[0], 2)
+    return round(acuracia['rouge1'], 2)
 
 
 def display_summarization(text, language):
