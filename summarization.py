@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 10 09:18:08 2022
 @author: Victor Resende
 """
 
