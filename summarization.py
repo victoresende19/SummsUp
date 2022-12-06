@@ -7,7 +7,7 @@ Created on Thu Nov 10 09:18:08 2022
 import streamlit as st
 import pdfplumber
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, BertTokenizerFast, EncoderDecoderModel
-#import torch
+import torch
 import evaluate
 from io import StringIO
 from PIL import Image
@@ -19,7 +19,7 @@ def extract_data(doc):
     recebe - doc: documento pdf PDF 
     retorna - text: texto extraído
     """
-    
+
     pdf = pdfplumber.open(doc)
     text = ''
     for page in pdf.pages:
@@ -34,7 +34,7 @@ def file_upload(file):
     recebe - file: arquivo pdf
     retorna - text: arquivo pdf
     """
-   
+
     if file is not None:
         pdf = extract_data(file)
         return pdf
@@ -47,7 +47,7 @@ def portuguese_model():
     (https://huggingface.co/phpaiola/ptt5-base-summ-xlsum)
     retorna - tokenizer: tokenizador, model_pt: modelo pre-treinado em portugues    
     """
-    
+
     token_name = 'unicamp-dl/ptt5-base-portuguese-vocab'
     model_name = 'phpaiola/ptt5-base-summ-xlsum'
 
@@ -64,10 +64,10 @@ def english_model():
     (https://huggingface.co/mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization)
     retorna - device: dispositivo, tokenizer: tokenizador, model_en: modelo pre-treinado em ingles    
     """
-    
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     tokenizer = BertTokenizerFast.from_pretrained('mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization')
-    model = EncoderDecoderModel.from_pretrained('mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization').to(device)
+    model_en = EncoderDecoderModel.from_pretrained('mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization').to(device)
 
     return device, tokenizer, model_en
 
@@ -79,7 +79,7 @@ def ROUGE_metric():
     (https://huggingface.co/spaces/evaluate-metric/rouge)
     retorna - ROUGE: modelo ROUGE  
     """
-    
+
     ROUGE = evaluate.load('rouge')
 
     return ROUGE
@@ -108,7 +108,7 @@ def english_summarization(text: str) -> str:
     recebe - texto: texto disponibilizado 
     retorna - texto: texto sumarizado (em inglês)
     """
-    
+
     device, tokenizer, model = english_model()
 
     inputs = tokenizer([text], padding="max_length", truncation=True, max_length=512, return_tensors="pt")
@@ -137,10 +137,18 @@ def acc_summarization(texto: str, resumo: str) -> str:
 
 
 def display_summarization(text, language):
+
     if language == 'Português':
-        return portuguese_summarization(text)
+        final_summary = portuguese_summarization(text)
+        st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
+        st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
+        st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
+
     elif language == 'Inglês':
-        return english_summarization(text)
+        final_summary = english_summarization(text)
+        st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
+        st.info(f"{final_summary}")
+        st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
 
 
 st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
@@ -187,10 +195,7 @@ if text_type == 'Resumo escrito':
 
     if submit_button:
         with st.spinner('Resumindo...'):
-            final_summary = display_summarization(text, language)
-            st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>",  unsafe_allow_html=True)
-            st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
+            display_summarization(text, language)
 
 elif text_type == 'Resumo em PDF':
     form = st.form(key='my_form')
@@ -201,7 +206,4 @@ elif text_type == 'Resumo em PDF':
     if file is not None and submit_button is not False:
         pdf = extract_data(file)
         with st.spinner('Resumindo...'):
-            final_summary = display_summarization(pdf, language)
-            st.markdown("<h4 style='text-align: center; color: black;'> Resumo </h4>", unsafe_allow_html=True)
-            st.info(f"{final_summary.replace('<pad> ', '').replace('</s>', '')}")
-            st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(pdf, final_summary)}</p>", unsafe_allow_html=True)
+            display_summarization(pdf, language)
