@@ -154,7 +154,7 @@ st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout=
 st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>", unsafe_allow_html=True)
 
-modelAbout = st.sidebar.expander(label="🛈 Sobre as redes neurais", expanded=False)
+modelAbout = st.expander(label="🛈 Sobre as redes neurais", expanded=False)
 modelAbout.markdown(
     """
         **Português:**O modelo utilizado é referente ao [Portuguese T5 for Abstractive Summarization (PTT5 Summ)](https://huggingface.co/phpaiola/ptt5-base-summ-xlsum). Além disso este modelo foi ajustado nos conjuntos de dados: WikiLingua, XL-Sum, TeMário e CSTNews.
