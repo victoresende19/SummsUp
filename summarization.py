@@ -154,6 +154,15 @@ st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout=
 st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>", unsafe_allow_html=True)
 
+modelAbout = st.sidebar.expander(label="🛈 Sobre as redes neurais", expanded=False)
+modelAbout.markdown(
+    """
+        **Português:**O modelo utilizado é referente ao [Portuguese T5 for Abstractive Summarization (PTT5 Summ)](https://huggingface.co/phpaiola/ptt5-base-summ-xlsum). Além disso este modelo foi ajustado nos conjuntos de dados: WikiLingua, XL-Sum, TeMário e CSTNews.
+        
+        **Inglês:**O modelo utilizado é referente ao [Bert-small2Bert-small Summarization with EncoderDecoder Framework (Bert-small2Bert-small)](https://huggingface.co/mrm8488/bert-small2bert-small-finetuned-cnn_daily_mail-summarization). Além disso este modelo é um modelo BERT2BERT (pequeno) ajustado nos conjuntos de dados de resumo CNN/Dailymail.
+    """
+)
+
 st.markdown(
     """
     <style>
