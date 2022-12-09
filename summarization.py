@@ -150,8 +150,8 @@ def display_summarization(text, language):
         st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
 
 
-st.set_page_config(page_icon='🎈', page_title='Sumarizador de textos', layout='wide')
-st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 Sumarizador de textos 📋 </h1>", unsafe_allow_html=True)
+st.set_page_config(page_icon='🎈', page_title='SummsUp', layout='wide')
+st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 SummsUp 📋 </h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>", unsafe_allow_html=True)
 
 modelAbout = st.expander(label="🛈 Sobre as redes neurais", expanded=False)
@@ -180,7 +180,7 @@ st.markdown(
 expanderAbout = st.sidebar.expander(label="🛈 Sobre o aplicativo", expanded=True)
 expanderAbout.markdown(
     """
-        - O *Sumarizador de Textos* é uma interface fácil de usar construída em Stramlit para criar resumos de textos digitados pelo usuário ou arquivos PDF.
+        - O *SummsUp* é uma interface fácil de usar construída em Stramlit para criar resumos de textos digitados pelo usuário ou arquivos PDF.
         - O aplicativo utiliza redes neurais pré-treinadas que aproveitam várias incorporações de NLP e depende de [Transformers](https://huggingface.co/transformers/).
         - Além disso, a aplicação conta com suporte para resumir dois tipos de idiomas: Português e Inglês! 🤗
     """
