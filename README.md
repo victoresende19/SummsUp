@@ -2,7 +2,8 @@
 
 *SummsUp* é uma interface fácil de usar construída em Stramlit para criar resumos de textos digitados pelo usuário ou arquivos PDF. O aplicativo utiliza redes neurais pré-treinadas que aproveitam várias incorporações de NLP e depende de [Transformers](https://huggingface.co/transformers/).
 
-# Línguas 🇧🇷 🇺🇲
+# Línguas ![image](https://user-images.githubusercontent.com/63743020/206604130-a80cd71e-7c8c-4174-ae54-20aa8627dec5.png) ![image](https://user-images.githubusercontent.com/63743020/206604148-edc3020b-2ddf-4b9d-aff4-04116150f285.png)
+
 - Português
 - Inglês
 
