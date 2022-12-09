@@ -197,7 +197,7 @@ text_type = st.selectbox('Que maneira gostaria de resumir seu texto?', ('Escolha
 
 if text_type == 'Resumo escrito':
     form = st.form(key='my_form')
-    language = form.selectbox('Qual a língua do PDF?', ('Português', 'Inglês'))
+    language = form.selectbox('Qual a língua do texto?', ('Português', 'Inglês'))
     text = form.text_area("Texto a ser resumido:", height=300, placeholder='Escreva aqui...')
     submit_button = form.form_submit_button(label='✨ Resumir!')
 
