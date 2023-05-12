@@ -94,7 +94,7 @@ def portuguese_summarization(text: str) -> str:
 
     tokenizer, model_pt = portuguese_model()
     inputs = tokenizer.encode(text, max_length=512, truncation=True, return_tensors='pt')
-    summary_ids = model_pt.generate(inputs, max_length=10, min_length=3, num_beams=5, no_repeat_ngram_size=2, early_stopping=False)
+    summary_ids = model_pt.generate(inputs, max_length=256, min_length=37, num_beams=5, no_repeat_ngram_size=3, early_stopping=False)
     resumo = tokenizer.decode(summary_ids[0])
 
     return resumo
