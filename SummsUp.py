@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Victor Resende
-"""
-
 import streamlit as st
 import pdfplumber
 from transformers import T5Tokenizer, T5ForConditionalGeneration, pipeline, BertTokenizerFast, EncoderDecoderModel
@@ -150,7 +145,7 @@ def display_summarization(text, language):
         st.markdown(f"<p> Acurácia (<a href='https://huggingface.co/spaces/evaluate-metric/rouge'>ROUGE1</a>): {acc_summarization(text, final_summary)}</p>", unsafe_allow_html=True)
 
 
-st.set_page_config(page_icon='🎈', page_title='SummsUp', layout='wide')
+st.set_page_config(page_icon='🎉', page_title='SummsUp', layout='wide')
 st.markdown("<h1 style='text-align: center; color: black; font-size: 42px'> 📋 SummsUp 📋 </h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: black;'> Por Victor Augusto Souza Resende </p>", unsafe_allow_html=True)
 
